@@ -51,9 +51,9 @@ void putInSameGroup(Point points[], int n, int group1, int group2) {
 }
 
 int main() {
-    int testcase;
-    while (scanf("%d", &testcase) != EOF) {   // 讀取測試案例數
-        for (int caseCount = 0; caseCount < testcase; ++caseCount) {
+    int test;
+    while (scanf("%d", &test) != EOF) {   // 讀取測試案例數
+        for (int caseCount = 0; caseCount < test; ++caseCount) {
             if (caseCount > 0) printf("\n"); // 測試案例之間輸出空行
 
             int n;
