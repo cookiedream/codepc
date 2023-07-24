@@ -57,7 +57,7 @@ int main() {
         int n;
         scanf("%d", &n); // 讀取點的數量
 
-        Point points[105]; // 定義 Point 陣列用來儲存每個點的座標和群組標記，假設最多有 105 個點
+        Point points[100]; // 定義 Point 陣列用來儲存每個點的座標和群組標記，假設最多有 100 個點
         for (int i = 0; i < n; ++i) {
             scanf("%lf%lf", &(points[i].x), &(points[i].y)); // 讀取每個點的座標
             points[i].group = i; // 初始化每個點的群組標記，將每個點都設置為一個獨立的群組
