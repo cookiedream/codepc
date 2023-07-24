@@ -1,91 +1,83 @@
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <cstdio>
-#include <cstring>
-#include <cmath>
-#include <map>
+#include<cstdio>
+#include<cmath>
+#include<climits>
+#define N 101
 
-using namespace std;
-#define MAXN 100000
-
-int pr[MAXN]; // 定義一個陣列pr，用來存儲集合的父節點，這個陣列在Union-Find算法中使用
-
-// Union-Find算法的Find操作，用於找到節點r所屬的集合代表節點
-int findset(int r)
+struct Point
 {
-    if(pr[r] == r) return r; // 如果節點r是集合的代表節點，則返回r
+    double x, y;
 
-    return findset(pr[r]); // 否則遞迴地尋找r所在的集合代表節點
-}
-
-// Union-Find算法的MakeSet操作，用於初始化n個節點的集合
-void makeset(int n)
-{
-    for(int i = 0; i < n; i++)
-        pr[i] = i; // 初始時每個節點自成一個集合，並將其父節點設置為自身
-}
-
-// 定義邊的結構體，包含起點u、終點v和權重w
-struct Edge
-{
-    int u, v; // 起點和終點
-    double w; // 權重
-    bool operator < (const Edge &p) const
+    double getDistance(const Point& a)
     {
-        return w < p.w; // 用於對邊按照權重進行遞增排序
+        return sqrt((x - a.x)*(x - a.x) + (y - a.y)*(y - a.y));
     }
-};
 
-vector<Edge> e; // 存儲所有的邊
+}point[N];
 
-double dist[100][2]; // 存儲點的座標
-
-// Kruskal演算法，用於計算最小生成樹的權重和
-double krushkal(int n)
-{
-    double sum = 0; // 初始化最小生成樹的權重總和為0
-    sort(e.begin(), e.end()); // 將所有邊按照權重進行排序
-    makeset(n); // 初始化n個節點的集合
-    for(int i = 0; i < (int)e.size(); i++)
-    {
-        int u = findset(e[i].u); // 找到邊的起點u所屬的集合代表節點
-        int v = findset(e[i].v); // 找到邊的終點v所屬的集合代表節點
-
-        if(u != v) // 如果起點和終點不在同一個集合中（不會形成環路）
-        {
-            pr[u] = v; // 將起點所屬的集合合併到終點所屬的集合中（使用Union操作）
-            sum += e[i].w; // 將這條邊的權重加到最小生成樹的權重總和上
-        }
-    }
-    return sum; // 返回最小生成樹的權重總和
-}
-
+double prim(int n);
 int main()
 {
-    int kase, n, k; // 定義變數
-    while(scanf("%d", &kase) == 1) // 讀取kase的值，用於控制測試案例數
-    {
-        while(kase--) // 開始測試案例迴圈
-        {
-            cin >> n; // 讀取點的個數n
-            for(int i = 0; i < n; i++)
-            {
-                scanf("%lf %lf", &dist[i][0], &dist[i][1]); // 讀取每個點的座標
-            }
-            e.clear(); // 清空存儲邊的向量
-            for(int i = 0; i < n; i++)
-                for(int j = i + 1; j < n; j++)
-                {
-                    Edge data;
-                    data.u = i; // 邊的起點
-                    data.v = j; // 邊的終點
-                    data.w = sqrt(pow(dist[i][0] - dist[j][0], 2) + pow(dist[i][1] - dist[j][1], 2)); // 計算邊的權重（歐幾里德距離）
-                    e.push_back(data); // 將邊加入存儲邊的向量中
-                }
+    int Case;
+    scanf("%d", &Case);
 
-            printf("%.2lf\n", krushkal(n)); // 計算最小生成樹的權重總和並輸出（保留兩位小數）
-            if(kase) printf("\n"); // 如果不是最後一個測試案例，輸出一個空行
-        }
+    int M[N][N] = {};
+    while (Case--)
+    {
+        int n;
+        scanf("%d", &n);
+        for (int i = 0; i < n; i++)
+            scanf("%lf%lf", &point[i].x, &point[i].y);
+
+        printf("%.2lf\n", prim(n));  // 呼叫prim函式計算最小生成樹的權重總和並輸出，保留兩位小數
+        if (Case)
+            putchar('\n');  // 如果不是最後一個測試案例，輸出一個空行
     }
+
+    return 0;
+}
+
+// prim演算法，計算最小生成樹的權重總和
+double prim(int n)
+{
+    bool isVisit[N] = {}; // 標記節點是否已經加入最小生成樹
+    double w[N][N] = {}, d[N]; // w陣列用來儲存點之間的距離，d陣列用來儲存每個點到最小生成樹的最短距離
+    double sum = 0; // 初始化最小生成樹的權重總和為0
+
+    //建 adjacency matrix，計算每對點之間的距離並儲存
+    int i, j;
+    for (i = 0; i < n; i++)
+        for (j = i + 1; j < n; j++)
+            w[j][i] = w[i][j] = point[i].getDistance(point[j]);
+
+    //從 0 開始走，將0點加入最小生成樹，初始化d陣列
+    for (i = 0; i < n; i++)
+        d[i] = w[0][i];
+    isVisit[0] = true;
+
+    for (i = 0; i < n; i++)
+    {
+        //找離樹最近的點，將其加入最小生成樹
+        int next = -1;
+        double min = INT_MAX;
+        for (j = 0; j < n; j++)
+            if (d[j] < min&&!isVisit[j])
+            {
+                min = d[j];
+                next = j;
+            }
+
+        //已經沒有離樹最近的點了，退出迴圈
+        if (next == -1)
+            break;
+
+        sum += min; // 將找到的最短距離加到最小生成樹的權重總和上
+        isVisit[next] = true; // 將這個點標記為已訪問，加入最小生成樹
+
+        //根據新加入的點，更新樹到各點的最短距離
+        for (j = 0; j < n; j++)
+            if (w[next][j] < d[j])
+                d[j] = w[next][j];
+    }
+
+    return sum; // 返回最小生成樹的權重總和
 }
